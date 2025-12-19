@@ -1,0 +1,34 @@
+* { box-sizing: border-box; }
+body { margin:0; background: linear-gradient(135deg, #1e3c72, #2a5298); height:100vh; display:flex; align-items:center; justify-content:center; }
+.login-box { background:rgba(0,0,0,0.85); color:white; padding: 50px 30px; border-radius:20px; width:380px; text-align:center; box-shadow:0 20px 40px rgba(0,0,0,0.6); }
+.logo { width:90px; margin-bottom:20px; border-radius:12px; }
+h1 { margin:0 0 10px; font-size:26px; }
+p { margin:0 0 30px; opacity:0.9; }
+.form-group input,
+.form-group button { width: 100%;}
+input { width:100%; padding:14px 18px; margin:12px 0; border:none; border-radius:50px; background:#444; color:white; font-size:16px; }
+input:focus { outline:none; background:#555; }
+.password-wrapper {
+  position: relative;
+}
+.password-wrapper input {
+  padding-right: 48px; /* ruang untuk icon */
+}
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 18px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 18px;
+  opacity: 0.7;
+  user-select: none;
+}
+.toggle-password:hover {
+  opacity: 1;
+}
+button { width:50%; padding:15px; margin-top:20px; background:#2F58CE; color:white; border:none; border-radius:50px; font-size:18px; font-weight:bold; cursor:pointer; }
+button:hover { background:#1e40af; }
+.error { color:#ff6b6b; margin-top:10px; font-size:14px; display:none; }
+.back { margin-top:20px; }
+.back a { color:#a0d8ff; text-decoration:none; font-size:14px; }

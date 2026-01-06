@@ -1,12 +1,23 @@
 <?php
-session_start();
-$dsn = 'mysql:host=localhost;dbname=hardcover_app';
-$username = 'root';
-$password = '';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$host = "localhost";
+$db   = "hardcover_app";
+$user = "root";
+$pass = "";
+
 try {
-    $pdo = new PDO($dsn, $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo = new PDO(
+        "mysql:host=$host;dbname=$db;charset=utf8",
+        $user,
+        $pass,
+        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+    );
 } catch (PDOException $e) {
-    die("Connection failed: " . $e->getMessage());
+    http_response_code(500);
+    echo json_encode(['error' => 'DB Error']);
+    exit;
 }
 ?>

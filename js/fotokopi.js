@@ -1,32 +1,32 @@
 // ===============================================
-// FOTOKOPI DASHBOARD - PHP BACKEND VERSION
+// FOTOKOPI DASHBOARD - FINAL SYNC VERSION
 // ===============================================
 
-const API_GET_ORDERS = 'php/get_orders.php';
+const API_GET_ORDERS   = 'php/get_orders.php';
 const API_UPDATE_STATUS = 'php/update_status.php';
 
 let allOrders = [];
 
-/**
- * Mapping status DB → label UI
- */
+// ===============================
+// STATUS MAP
+// ===============================
 const STATUS_LABEL = {
-    MENUNGGU_VALIDASI: 'Menunggu Validasi',
-    DIPROSES_FOTOKOPI: 'Diproses',
-    SELESAI: 'Selesai',
-    SUDAH_DIAMBIL: 'Diambil'
+    'MENUNGGU_VALIDASI': 'Menunggu',
+    'DIPROSES_FOTOKOPI': 'Diproses',
+    'SELESAI': 'Selesai',
+    'SUDAH_DIAMBIL': 'Diambil'
 };
 
 const STATUS_COLOR = {
-    MENUNGGU_VALIDASI: 'yellow',
-    DIPROSES_FOTOKOPI: 'blue',
-    SELESAI: 'green',
-    SUDAH_DIAMBIL: 'gray'
+    'MENUNGGU_VALIDASI': 'yellow',
+    'DIPROSES_FOTOKOPI': 'blue',
+    'SELESAI': 'green',
+    'SUDAH_DIAMBIL': 'gray'
 };
 
-// ===============================================
+// ===============================
 // LOAD ORDERS
-// ===============================================
+// ===============================
 async function loadOrders() {
     try {
         const res = await fetch(API_GET_ORDERS);
@@ -43,7 +43,7 @@ async function loadOrders() {
             nama: o.mahasiswa_info.nama,
             nim: o.mahasiswa_info.nim,
             prodi: o.mahasiswa_info.prodi,
-            wa: o.mahasiswa_info.wa,
+            wa: o.mahasiswa_info.no_wa,
             catatan: o.mahasiswa_info.catatan,
             fileUrl: o.file_pdf ? `uploads/${o.file_pdf}` : null,
             status: o.status,
@@ -59,9 +59,9 @@ async function loadOrders() {
     }
 }
 
-// ===============================================
+// ===============================
 // UPDATE STATUS
-// ===============================================
+// ===============================
 async function ubahStatus(orderId, newStatus) {
     if (!confirm('Ubah status pesanan?')) return;
 
@@ -89,12 +89,12 @@ async function ubahStatus(orderId, newStatus) {
     }
 }
 
-// ===============================================
-// RENDER ALL TABLE
-// ===============================================
+// ===============================
+// RENDER TABLE
+// ===============================
 function renderAll() {
     const tbodyAntrian = document.querySelector('.antrian-table tbody');
-    const tbodySemua = document.querySelector('.semua-table tbody');
+    const tbodySemua   = document.querySelector('.semua-table tbody');
 
     const antrian = allOrders.filter(o => o.status === 'DIPROSES_FOTOKOPI');
 
@@ -108,7 +108,7 @@ function renderTable(tbody, data, isAntrian) {
     if (data.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="6" style="text-align:center;color:#888;padding:30px">
+                <td colspan="6" style="text-align:center;padding:30px;color:#888">
                     Tidak ada data
                 </td>
             </tr>`;
@@ -166,34 +166,37 @@ function renderTable(tbody, data, isAntrian) {
     });
 }
 
-// ===============================================
-// DETAIL POPUP
-// ===============================================
+// ===============================
+// DETAIL POPUP (SIMPLE DEMO)
+// ===============================
 function bukaDetail(orderId) {
     const o = allOrders.find(x => x.id === orderId);
     if (!o) return;
 
     alert(
-        `Nama : ${o.nama}\n` +
-        `NIM  : ${o.nim}\n` +
-        `Prodi: ${o.prodi}\n` +
-        `WA   : ${o.wa}\n` +
+        `Nama   : ${o.nama}\n` +
+        `NIM    : ${o.nim}\n` +
+        `Prodi  : ${o.prodi}\n` +
+        `WA     : ${o.mo_wa}\n` +
         `Catatan: ${o.catatan || '-'}`
     );
 }
 
-// ===============================================
+// ===============================
 // SUMMARY
-// ===============================================
+// ===============================
 function updateSummary() {
-    document.querySelectorAll('.summary-item strong')[0].textContent = allOrders.length;
+    document.querySelectorAll('.summary-item strong')[0].textContent =
+        allOrders.length;
+
     document.querySelectorAll('.summary-item strong')[1].textContent =
         allOrders.filter(o => o.status === 'DIPROSES_FOTOKOPI').length;
+
     document.querySelectorAll('.summary-item strong')[2].textContent =
         allOrders.filter(o => o.status === 'SELESAI').length;
 }
 
-// ===============================================
+// ===============================
 // INIT
-// ===============================================
+// ===============================
 document.addEventListener('DOMContentLoaded', loadOrders);

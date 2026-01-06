@@ -1,4 +1,15 @@
-<?php require 'php/auth_check.php'; ?>
+<?php
+session_start();
+require 'php/auth_check.php';
+
+// Batasi role
+if ($_SESSION['role'] !== 'fotokopi') {
+    http_response_code(401);
+    echo "Unauthorized role";
+    exit;
+}
+?>
+ 
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -14,6 +25,7 @@
     <a href="#beranda" onclick="scrollToSection('beranda')">Beranda</a>
     <a href="#pesanan" onclick="scrollToSection('pesanan')">Pesanan</a>
     <a href="#statistik" onclick="scrollToSection('statistik')">Statistik</a>
+    <a href="php/logout.php" onclick="return confirm('Yakin ingin logout?')">Logout</a>
   </div>
 </header>
 

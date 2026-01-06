@@ -40,17 +40,17 @@ header {
 
 .top-menu a:hover,
 .top-menu a.active {
-  background: white; 
+  background: white;
   color: #2F58CE;
   padding: 7px 17px;
 }
 
 /* menu login */
 .top-menu a.menu-login {
-    background: #2F58CE; 
-    color: white;
-    padding: 7px 27px; 
-  }
+  background: #2F58CE;
+  color: white;
+  padding: 7px 27px;
+}
 
 /* Smooth scroll untuk seluruh halaman */
 html {
@@ -69,9 +69,19 @@ html {
   width: 100px;
 }
 
-.title h1 { font-size: 28px; text-align: center; }
-.title h2 { font-size: 36px; font-weight: bold; }
-.title h3 { font-size: 20px; }
+.title h1 {
+  font-size: 28px;
+  text-align: center;
+}
+
+.title h2 {
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.title h3 {
+  font-size: 20px;
+}
 
 /* Main */
 main {
@@ -90,7 +100,10 @@ main {
   margin-bottom: 30px;
 }
 
-.search-section h2 { font-size: 26px; margin-bottom: 10px; }
+.search-section h2 {
+  font-size: 26px;
+  margin-bottom: 10px;
+}
 
 .search-section p {
   margin-bottom: 20px;
@@ -127,25 +140,129 @@ main {
 .search-result {
   margin-top: 25px;
   padding: 20px;
-  background: rgba(255,255,255,0.2);
+  background: rgba(47, 88, 206, 0.15);
   border-radius: 12px;
   color: white;
   min-height: 50px;
-  display: none; /* awalnya disembunyikan */
+  display: none;
+  /* awalnya disembunyikan */
   text-align: left;
   font-size: 15px;
 }
 
 .status-found {
-  background: rgba(76, 175, 80, 0.3);
-  border-left: 5px solid #4CAF50;
-  padding: 15px;
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(56, 142, 60, 0.3));
+  border-left: 4px solid #4CAF50;
+  border-radius: 10px;
+  padding: 20px;
+  color: #e8f5e9;
+}
+
+.status-found p {
+  margin: 8px 0;
+  color: white;
+}
+
+.status-found strong {
+  color: #a5d6a7;
 }
 
 .status-notfound {
-  background: rgba(244, 67, 54, 0.3);
-  border: 1.5px solid #f44336;
-  padding: 15px;
+  background: linear-gradient(135deg, rgba(100, 140, 200, 0.2), rgba(70, 110, 170, 0.3));
+  border-left: 4px solid #64b5f6;
+  border-radius: 10px;
+  padding: 20px;
+  color: #e3f2fd;
+}
+
+.status-notfound p {
+  margin: 8px 0;
+  color: white;
+}
+
+.status-notfound hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  margin: 12px 0;
+}
+
+/* Order Status Display */
+.status-order {
+  background: linear-gradient(135deg, rgba(50, 80, 150, 0.25), rgba(40, 70, 130, 0.35));
+  border-radius: 12px;
+  padding: 20px;
+  color: white;
+}
+
+.status-order.status-orange {
+  border-left: 4px solid #ff9800;
+}
+
+.status-order.status-blue {
+  border-left: 4px solid #2196f3;
+}
+
+.status-order.status-green {
+  border-left: 4px solid #4caf50;
+}
+
+.status-order.status-gray {
+  border-left: 4px solid #9e9e9e;
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.order-number {
+  font-size: 1.3em;
+  font-weight: bold;
+  color: #64b5f6;
+}
+
+.order-status {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  font-weight: 600;
+}
+
+.order-status.orange {
+  background: rgba(255, 152, 0, 0.3);
+  color: #ffcc80;
+}
+
+.order-status.blue {
+  background: rgba(33, 150, 243, 0.3);
+  color: #90caf9;
+}
+
+.order-status.green {
+  background: rgba(76, 175, 80, 0.3);
+  color: #a5d6a7;
+}
+
+.order-status.gray {
+  background: rgba(158, 158, 158, 0.3);
+  color: #e0e0e0;
+}
+
+.status-order hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  margin: 15px 0;
+}
+
+.status-order p {
+  margin: 8px 0;
+  font-size: 0.95em;
+}
+
+.status-order strong {
+  color: #90caf9;
 }
 
 .search-box {
@@ -154,7 +271,7 @@ main {
   margin: 0 auto;
   border-radius: 50px;
   overflow: hidden;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .search-box input {
@@ -197,7 +314,9 @@ main {
   gap: 20px;
 }
 
-.full-width { grid-column: 1 / -1; }
+.full-width {
+  grid-column: 1 / -1;
+}
 
 .form-group label {
   display: block;
@@ -205,7 +324,9 @@ main {
   font-weight: 600;
 }
 
-.required { color: red; }
+.required {
+  color: red;
+}
 
 .form-group input,
 .form-group textarea {
@@ -216,9 +337,14 @@ main {
   font-size: 15px;
 }
 
-.form-group textarea { height: 100px; resize: vertical; }
+.form-group textarea {
+  height: 100px;
+  resize: vertical;
+}
 
-#fileUpload { display: none; }
+#fileUpload {
+  display: none;
+}
 
 .btn-choose {
   background: #e0e0e0;
@@ -247,9 +373,21 @@ main {
   cursor: pointer;
 }
 
-.error { color: #e74c3c; font-size: 13px; display: block; margin-top: 5px; }
-small { color: #777; font-size: 13px; }
-#wordCount { font-weight: bold; }
+.error {
+  color: #e74c3c;
+  font-size: 13px;
+  display: block;
+  margin-top: 5px;
+}
+
+small {
+  color: #777;
+  font-size: 13px;
+}
+
+#wordCount {
+  font-weight: bold;
+}
 
 
 
@@ -269,11 +407,11 @@ small { color: #777; font-size: 13px; }
 }
 
 .queue-cards {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 20px;
-    padding-left: 60px;
-    margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+  padding-left: 60px;
+  margin: 0 auto;
 }
 
 .queue-card {
@@ -286,7 +424,7 @@ small { color: #777; font-size: 13px; }
 }
 
 .queue-card .icon img {
-  width: 48px;     
+  width: 48px;
   height: 48px;
   object-fit: contain;
 }
@@ -321,9 +459,17 @@ small { color: #777; font-size: 13px; }
   border-radius: 40%;
 }
 
-.icon-green-wrapper { background: #66CB00; }
-.icon-yellow-wrapper { background: #D1D100; }
-.icon-blue-wrapper { background: #0000AF; }
+.icon-green-wrapper {
+  background: #66CB00;
+}
+
+.icon-yellow-wrapper {
+  background: #D1D100;
+}
+
+.icon-blue-wrapper {
+  background: #0000AF;
+}
 
 .queue-card .number {
   font-size: 27px;
@@ -368,10 +514,18 @@ footer {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .form-grid { grid-template-columns: 1fr; }
-  .logo-title { flex-direction: column; }
-  .queue-cards { gap: 15px; }
-  
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .logo-title {
+    flex-direction: column;
+  }
+
+  .queue-cards {
+    gap: 15px;
+  }
+
   /* MENU RESPONSIVE DI HP */
   .top-menu {
     flex-direction: column;
@@ -394,12 +548,14 @@ footer {
 
   /* MENU LOGIN DI BAWAH */
   .menu-login {
-    order: 2; /* letakkan paling bawah */
+    order: 2;
+    /* letakkan paling bawah */
     margin-top: 10px;
   }
 
   body {
-    font-size: 12px; /* default lebih kecil */
+    font-size: 12px;
+    /* default lebih kecil */
   }
 
   .logo {
@@ -452,6 +608,7 @@ footer {
     height: 34px;
     font-size: 12px;
   }
+
   .number-input input {
     width: 60px;
     height: 36px;
@@ -495,6 +652,7 @@ footer {
     margin-bottom: 15px;
     font-size: 16px;
   }
+
   .contact-info p {
     font-size: 12px;
   }
@@ -502,9 +660,25 @@ footer {
 }
 
 .notif-list {
-  margin-top: 20px;
-  padding: 10px;
-  background: #f0f0f0;
+  margin-top: 15px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
+  color: white;
+  display: none;
 }
-.notif-list ul { list-style: disc; padding-left: 20px; }
+
+.notif-list h4 {
+  color: #a5d6a7;
+  margin-bottom: 10px;
+}
+
+.notif-list ul {
+  list-style: disc;
+  padding-left: 20px;
+  color: white;
+}
+
+.notif-list li {
+  margin: 5px 0;
+}

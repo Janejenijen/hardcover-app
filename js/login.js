@@ -1,52 +1,47 @@
-$(document).ready(function() {
-  alert('login.js loaded!'); // Test: Harus muncul saat page load. Hilangkan setelah OK
-  console.log('jQuery loaded and ready');
-
-  $('#loginBtn').click(function() {
+$(document).ready(function () {
+  $('#loginBtn').click(function () {
     login();
+  });
+
+  // Enter key to submit
+  $('#password').keypress(function (e) {
+    if (e.which === 13) login();
   });
 
   function togglePassword() {
     var passwordField = document.getElementById('password');
-    var icon = document.querySelector('.toggle-password img');
-    if (passwordField.type === 'password') {
-      passwordField.type = 'text';
-    } else {
-      passwordField.type = 'password';
-    }
+    passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
   }
   window.togglePassword = togglePassword;
 
   function login() {
-    console.log('Login function called');
     var username = $('#username').val().trim();
     var password = $('#password').val();
+
     if (!username || !password) {
       $('#errorMsg').text('Isi username dan password').show();
-      console.log('Validation failed: Empty fields');
       return;
     }
+
     $('#errorMsg').hide();
-    console.log('Sending AJAX to php/login.php with user:', username); // Fix path di url jika perlu
+    $('#loginBtn').prop('disabled', true).text('Loading...');
+
     $.ajax({
-      url: 'php/login.php', // Fix: Tanpa ../ jika di root
+      url: 'php/login.php',
       type: 'POST',
       data: { username: username, password: password },
       dataType: 'json',
-      success: function(res) {
-        console.log('AJAX success response:', res);
+      success: function (res) {
         if (res.success) {
-          console.log('Redirecting to:', res.redirect);
           window.location.href = res.redirect;
         } else {
           $('#errorMsg').text(res.error || 'Login gagal').show();
-          console.log('Error from server:', res.error);
+          $('#loginBtn').prop('disabled', false).text('Masuk');
         }
       },
-      error: function(xhr, status, error) {
-        console.error('AJAX error:', status, error, xhr.responseText);
-        $('#errorMsg').text('Error koneksi: ' + error).show();
-        alert('Cek console untuk detail error');
+      error: function () {
+        $('#errorMsg').text('Error koneksi ke server').show();
+        $('#loginBtn').prop('disabled', false).text('Masuk');
       }
     });
   }

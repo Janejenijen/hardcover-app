@@ -2,23 +2,25 @@
 // FOTOKOPI DASHBOARD - FINAL SYNC VERSION
 // ===============================================
 
-const API_GET_ORDERS   = 'php/get_orders.php';
+const API_GET_ORDERS = 'php/get_orders.php';
 const API_UPDATE_STATUS = 'php/update_status.php';
 
 let allOrders = [];
 
 // ===============================
-// STATUS MAP
+// STATUS MAP (includes old status for backward compatibility)
 // ===============================
 const STATUS_LABEL = {
-    'MENUNGGU_VALIDASI': 'Menunggu',
+    'MENUNGGU_PROSES': 'Menunggu',
+    'MENUNGGU_VALIDASI': 'Menunggu', // Old status, same display
     'DIPROSES_FOTOKOPI': 'Diproses',
     'SELESAI': 'Selesai',
     'SUDAH_DIAMBIL': 'Diambil'
 };
 
 const STATUS_COLOR = {
-    'MENUNGGU_VALIDASI': 'yellow',
+    'MENUNGGU_PROSES': 'yellow',
+    'MENUNGGU_VALIDASI': 'yellow', // Old status, same display
     'DIPROSES_FOTOKOPI': 'blue',
     'SELESAI': 'green',
     'SUDAH_DIAMBIL': 'gray'
@@ -94,12 +96,40 @@ async function ubahStatus(orderId, newStatus) {
 // ===============================
 function renderAll() {
     const tbodyAntrian = document.querySelector('.antrian-table tbody');
-    const tbodySemua   = document.querySelector('.semua-table tbody');
+    const tbodySemua = document.querySelector('.semua-table tbody');
 
-    const antrian = allOrders.filter(o => o.status === 'DIPROSES_FOTOKOPI');
+    // Get filter values
+    const searchAntrian = (document.getElementById('searchAntrian')?.value || '').toLowerCase();
+    const filterStatusAntrian = document.getElementById('filterStatusAntrian')?.value || '';
+    const searchPesanan = (document.getElementById('searchPesanan')?.value || '').toLowerCase();
+    const filterStatusPesanan = document.getElementById('filterStatusPesanan')?.value || '';
+
+    // Filter antrian (hanya yang DIPROSES_FOTOKOPI by default)
+    let antrian = allOrders.filter(o => o.status === 'DIPROSES_FOTOKOPI');
+    if (searchAntrian) {
+        antrian = antrian.filter(o =>
+            o.nama.toLowerCase().includes(searchAntrian) ||
+            o.nim.toLowerCase().includes(searchAntrian)
+        );
+    }
+    if (filterStatusAntrian) {
+        antrian = antrian.filter(o => o.status === filterStatusAntrian);
+    }
+
+    // Filter semua pesanan
+    let semua = [...allOrders];
+    if (searchPesanan) {
+        semua = semua.filter(o =>
+            o.nama.toLowerCase().includes(searchPesanan) ||
+            o.nim.toLowerCase().includes(searchPesanan)
+        );
+    }
+    if (filterStatusPesanan) {
+        semua = semua.filter(o => o.status === filterStatusPesanan);
+    }
 
     renderTable(tbodyAntrian, antrian, true);
-    renderTable(tbodySemua, allOrders, false);
+    renderTable(tbodySemua, semua, false);
 }
 
 function renderTable(tbody, data, isAntrian) {
@@ -149,10 +179,10 @@ function renderTable(tbody, data, isAntrian) {
                 </td>
                 <td>
                     <select onchange="ubahStatus(${order.id}, this.value)">
-                        <option value="MENUNGGU_VALIDASI" ${order.status==='MENUNGGU_VALIDASI'?'selected':''}>Menunggu</option>
-                        <option value="DIPROSES_FOTOKOPI" ${order.status==='DIPROSES_FOTOKOPI'?'selected':''}>Diproses</option>
-                        <option value="SELESAI" ${order.status==='SELESAI'?'selected':''}>Selesai</option>
-                        <option value="SUDAH_DIAMBIL" ${order.status==='SUDAH_DIAMBIL'?'selected':''}>Diambil</option>
+                        <option value="MENUNGGU_PROSES" ${order.status === 'MENUNGGU_PROSES' ? 'selected' : ''}>Menunggu</option>
+                        <option value="DIPROSES_FOTOKOPI" ${order.status === 'DIPROSES_FOTOKOPI' ? 'selected' : ''}>Diproses</option>
+                        <option value="SELESAI" ${order.status === 'SELESAI' ? 'selected' : ''}>Selesai</option>
+                        <option value="SUDAH_DIAMBIL" ${order.status === 'SUDAH_DIAMBIL' ? 'selected' : ''}>Diambil</option>
                     </select>
                     <button class="btn-detail"
                         onclick="bukaDetail(${order.id})">
@@ -167,25 +197,58 @@ function renderTable(tbody, data, isAntrian) {
 }
 
 // ===============================
-// DETAIL POPUP (SIMPLE DEMO)
+// DETAIL POPUP 
 // ===============================
 function bukaDetail(orderId) {
-    const o = allOrders.find(x => x.id === orderId);
-    if (!o) return;
+    const o = allOrders.find(x => x.id == orderId);
+    if (!o) return alert('Data tidak ditemukan');
 
-    alert(
-        `Nama   : ${o.nama}\n` +
-        `NIM    : ${o.nim}\n` +
-        `Prodi  : ${o.prodi}\n` +
-        `WA     : ${o.mo_wa}\n` +
-        `Catatan: ${o.catatan || '-'}`
-    );
+    const overlay = document.createElement('div');
+    overlay.className = 'popup-overlay';
+    overlay.onclick = () => overlay.remove();
+
+    overlay.innerHTML = `
+        <div class="popup-box" onclick="event.stopPropagation()">
+            <div class="popup-header">
+                <h3>Detail Pesanan</h3>
+                <span class="popup-close" onclick="this.closest('.popup-overlay').remove()">×</span>
+            </div>
+
+            <div class="popup-content">
+                <div class="info">
+                    <p><b>Nama</b>: ${o.nama}</p>
+                    <p><b>NIM</b>: ${o.nim}</p>
+                    <p><b>Prodi</b>: ${o.prodi}</p>
+                    <p><b>WhatsApp</b>: ${o.wa || '-'}</p>
+                    <p><b>Catatan</b>: ${o.catatan || '-'}</p>
+
+                    ${o.fileUrl
+            ? `<a href="${o.fileUrl}" target="_blank" class="btn-download">
+                                Download PDF
+                           </a>`
+            : `<i>Tidak ada file</i>`
+        }
+                </div>
+
+                <div class="preview">
+                    ${o.fileUrl
+            ? `<iframe src="${o.fileUrl}" frameborder="0"></iframe>`
+            : `<p style="text-align:center;color:#999">Preview tidak tersedia</p>`
+        }
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
 }
 
 // ===============================
 // SUMMARY
 // ===============================
 function updateSummary() {
+    const today = new Date().toISOString().split('T')[0];
+
     document.querySelectorAll('.summary-item strong')[0].textContent =
         allOrders.length;
 
@@ -193,7 +256,11 @@ function updateSummary() {
         allOrders.filter(o => o.status === 'DIPROSES_FOTOKOPI').length;
 
     document.querySelectorAll('.summary-item strong')[2].textContent =
-        allOrders.filter(o => o.status === 'SELESAI').length;
+        allOrders.filter(o => o.status === 'SELESAI' || o.status === 'SUDAH_DIAMBIL').length;
+
+    // Pesanan Hari Ini
+    document.querySelectorAll('.summary-item strong')[3].textContent =
+        allOrders.filter(o => o.tanggal && o.tanggal.startsWith(today)).length;
 }
 
 // ===============================

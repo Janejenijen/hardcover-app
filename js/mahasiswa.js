@@ -1,148 +1,287 @@
-$(document).ready(function() {
-  // Smooth scroll untuk menu
-  function scrollToSection(sectionId) {
-    document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
-  }
-  window.scrollToSection = scrollToSection; // Expose untuk onclick
+// ===============================================
+// MAHASISWA LANDING PAGE - HYBRID FLOW
+// Pendaftaran baru + Cek Status + Order
+// ===============================================
 
-  // Update file name saat pilih file
-  $('#fileUpload').change(function() {
+$(document).ready(function () {
+
+  // Smooth scroll
+  function scrollToSection(sectionId) {
+    const el = document.getElementById(sectionId);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  }
+  window.scrollToSection = scrollToSection;
+
+  // File name display
+  $('#fileUpload').change(function () {
     $('#fileName').text(this.files[0] ? this.files[0].name : 'Belum ada file dipilih');
   });
 
-  // Validasi input sebelum submit
-  function validateForm() {
-    var valid = true;
-    // Nama: hanya huruf & spasi
-    if (!/^[a-zA-Z\s]+$/.test($('#nama').val())) {
-      $('#error-nama').text('Hanya huruf dan spasi');
-      valid = false;
-    } else $('#error-nama').text('');
-    // NIM: tepat 8 digit angka
-    if (!/^\d{8}$/.test($('#nim').val())) {
-      $('#error-nim').text('Tepat 8 digit angka');
-      valid = false;
-    } else $('#error-nim').text('');
-    // WA: 10-13 digit angka
-    if (!/^\d{10,13}$/.test($('#wa').val())) {
-      $('#error-wa').text('10-13 digit angka');
-      valid = false;
-    } else $('#error-wa').text('');
-    // File: PDF & <10MB
-    var file = $('#fileUpload')[0].files[0];
-    if (file && (file.size > 10485760 || file.type !== 'application/pdf')) {
-      $('#error-file').text('PDF saja, max 10MB');
-      valid = false;
-    } else $('#error-file').text('');
-    return valid;
-  }
-
-  // Char count untuk namaDokumen
-  window.updateCharCount = function() {
-    var len = $('#namaDokumen').val().length;
-    $('#charCount').text(200 - len);
+  // Char counts
+  window.updateCharCount = function () {
+    $('#charCount').text(200 - $('#namaDokumen').val().length);
+  };
+  window.updateWordCount = function () {
+    $('#wordCount').text($('#catatan').val().length);
   };
 
-  // Word count untuk catatan (sebenarnya char, tapi hitung kata approx)
-  window.updateWordCount = function() {
-    var text = $('#catatan').val();
-    var count = text.length; // Ganti ke char count, sesuai maxlength 1200
-    $('#wordCount').text(count);
-  };
-
-  // Load dynamic queue status
+  // ===============================
+  // LOAD QUEUE STATUS
+  // ===============================
   function loadQueueStatus() {
-    $.get('php/get_orders.php', function(data) {
-      var total = data.length;
-      var proses = data.filter(o => o.status === 'DIPROSES_FOTOKOPI').length;
-      var selesai = data.filter(o => o.status === 'SELESAI' || o.status === 'SUDAH_DIAMBIL').length;
-      $('#totalPesanan').text(total);
-      $('#sedangProses').text(proses);
-      $('#selesai').text(selesai);
+    $.get('php/public_queue.php', function (data) {
+      $('#totalPesanan').text(data.total || 0);
+      $('#sedangProses').text(data.diproses || 0);
+      $('#selesai').text(data.selesai || 0);
     });
   }
-  loadQueueStatus(); // Call on load
+  loadQueueStatus();
 
-  // Search button
-  $('#btnCari').click(function() {
-    var search = $('#searchInput').val();
-    if (!search) return alert('Masukkan NIM/Nama');
-    $.get('php/get_validasi.php?search=' + search, function(data) {
-      $('#searchResult').html('').hide();
-      $('#notifList').html('');
-      if (data.length > 0) {
-        var item = data[0];
-        var allValid = item.valid_fakultas && item.valid_keuangan && item.valid_yayasan;
-        var status = `
-          <div class="status-${allValid ? 'found' : 'notfound'}">
-            <p>Nama: ${item.nama} (NIM: ${item.nim})</p>
-            <p>Fakultas: ${item.valid_fakultas ? 'Sudah' : 'Belum'}</p>
-            <p>Keuangan: ${item.valid_keuangan ? 'Sudah' : 'Belum'}</p>
-            <p>Yayasan: ${item.valid_yayasan ? 'Sudah' : 'Belum'}</p>
-            ${!allValid ? '<button id="ajukanBtn">Ajukan Validasi</button>' : '<p>Validasi lengkap, bisa order.</p>'}
+  // ===============================
+  // SEARCH NIM or ORDER NUMBER
+  // ===============================
+  $('#btnCari').click(function () {
+    var input = $('#searchInput').val().trim();
+
+    if (!input || !/^\d+$/.test(input)) {
+      alert('Masukkan NIM (8 digit) atau nomor antrian');
+      return;
+    }
+
+    $('#searchResult').html('<p style="text-align:center">Mencari...</p>').show();
+    $('#orderSection').hide();
+    $('#notifList').hide();
+
+    // Jika bukan 8 digit, coba cari sebagai nomor antrian dulu
+    if (input.length !== 8) {
+      searchOrder(input);
+    } else {
+      // 8 digit: bisa NIM atau nomor antrian, coba NIM dulu
+      searchNIM(input);
+    }
+  });
+
+  function searchOrder(orderId) {
+    $.get('php/public_order_search.php?search=' + encodeURIComponent(orderId), function (data) {
+      if (data.found && data.type === 'order') {
+        var o = data.order;
+        var statusHtml = `
+          <div class="status-order status-${o.status_color}">
+            <div class="order-header">
+              <span class="order-number">Antrian #${o.id}</span>
+              <span class="order-status ${o.status_color}">${o.status_icon} ${o.status_text}</span>
+            </div>
+            <hr>
+            <p><strong>Judul:</strong> ${o.judul || '-'}</p>
+            <p><strong>Pemesan:</strong> ${o.nama} (${o.nim})</p>
+            <p><strong>Prodi:</strong> ${o.prodi || '-'}</p>
+            <p><strong>Tanggal Order:</strong> ${formatDate(o.tanggal_order)}</p>
+            ${o.catatan ? `<p><strong>Catatan:</strong> ${o.catatan}</p>` : ''}
           </div>
         `;
-        $('#searchResult').html(status).show();
-        if (!allValid) {
-          $('#ajukanBtn').click(function() {
-            $.ajax({
-              url: 'php/ajukan_validasi.php',
-              type: 'POST',
-              contentType: 'application/json',
-              data: JSON.stringify({mahasiswa_id: item.id}),
-              success: function(res) {
-                alert(res.success ? 'Pengajuan dikirim!' : res.error);
-                loadQueueStatus(); // Refresh jika perlu
-              }
-            });
-          });
-        }
-        // Fetch notif
-        $.get('php/get_notif.php?mahasiswa_id=' + item.id, function(notifs) {
-          if (notifs.length > 0) {
-            var notifHtml = '<h4>Notifikasi:</h4><ul>';
-            notifs.forEach(n => notifHtml += `<li>${n.pesan} (${n.created_at})</li>`);
-            notifHtml += '</ul>';
-            $('#notifList').html(notifHtml);
-          }
-        });
+        $('#searchResult').html(statusHtml).show();
       } else {
-        $('#searchResult').html('<div class="status-notfound">Tidak ditemukan. Daftar dulu?</div>').show();
+        $('#searchResult').html(`
+          <div class="status-notfound">
+            <p>Nomor antrian <strong>#${orderId}</strong> tidak ditemukan.</p>
+            <p>Pastikan nomor antrian benar atau cari dengan NIM (8 digit).</p>
+          </div>
+        `).show();
+      }
+    }).fail(function () {
+      $('#searchResult').html('<div class="status-notfound">Gagal mencari. Coba lagi.</div>').show();
+    });
+  }
+
+  function searchNIM(nim) {
+    $.get('php/public_search.php?search=' + encodeURIComponent(nim), function (data) {
+      if (data.length === 0) {
+        // Tidak ada NIM, coba cari sebagai order
+        searchOrder(nim);
+        return;
+      }
+
+      var mhs = data[0];
+      var isValid = mhs.valid_fakultas && mhs.valid_keuangan;
+
+      var statusHtml = `
+        <div class="status-${isValid ? 'found' : 'notfound'}">
+          <p><strong>${mhs.nama}</strong> (${mhs.nim})</p>
+          <p>Prodi: ${mhs.prodi || '-'}</p>
+          <hr>
+          <p>Fakultas: ${mhs.valid_fakultas ? '✅ Tervalidasi' : '⏳ Menunggu'}</p>
+          <p>Keuangan: ${mhs.valid_keuangan ? '✅ Tervalidasi' : '⏳ Menunggu'}</p>
+          ${isValid
+          ? '<p style="color:#4CAF50;font-weight:bold;margin-top:10px">✅ Validasi lengkap! Silakan isi form order di bawah.</p>'
+          : '<p style="color:#ff6b6b;margin-top:10px">⏳ Menunggu validasi. Cek berkala atau hubungi bagian terkait.</p>'}
+        </div>
+      `;
+      $('#searchResult').html(statusHtml).show();
+
+      if (isValid) {
+        $('#displayNama').text(mhs.nama);
+        $('#displayNim').text(mhs.nim);
+        $('#displayProdi').text(mhs.prodi || '-');
+        $('#mahasiswaId').val(mhs.id);
+        $('#pendaftaran').hide(); // Hide registration form
+        $('#orderSection').show();
+        scrollToSection('orderSection');
+      }
+
+      // Load notifikasi
+      $.get('php/get_notif.php?mahasiswa_id=' + mhs.id, function (notifs) {
+        if (notifs && notifs.length > 0) {
+          var html = '<h4>Notifikasi:</h4><ul>';
+          notifs.forEach(n => html += `<li>${n.pesan}</li>`);
+          html += '</ul>';
+          $('#notifList').html(html).show();
+        }
+      });
+    }).fail(function () {
+      $('#searchResult').html('<div class="status-notfound">Gagal mencari. Coba lagi.</div>').show();
+    });
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '-';
+    var d = new Date(dateStr);
+    return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+
+  // Enter key search
+  $('#searchInput').keypress(function (e) {
+    if (e.which === 13) $('#btnCari').click();
+  });
+
+  // ===============================
+  // REGISTRATION FORM
+  // ===============================
+  $('#registrationForm').submit(function (e) {
+    e.preventDefault();
+
+    // Validate
+    var valid = true;
+    $('#error-nama, #error-nim, #error-wa').text('');
+
+    var nama = $('#nama').val().trim();
+    var nim = $('#nim').val().trim();
+    var prodi = $('#prodi').val();
+    var wa = $('#wa').val().trim();
+    var jenisLaporan = $('#jenisLaporan').val();
+
+    if (!/^[a-zA-Z\s]+$/.test(nama)) {
+      $('#error-nama').text('Hanya huruf dan spasi');
+      valid = false;
+    }
+    if (!/^\d{8}$/.test(nim)) {
+      $('#error-nim').text('Tepat 8 digit angka');
+      valid = false;
+    }
+    if (!prodi) {
+      alert('Pilih program studi');
+      valid = false;
+    }
+    if (!/^\d{10,13}$/.test(wa)) {
+      $('#error-wa').text('10-13 digit angka');
+      valid = false;
+    }
+    if (!jenisLaporan) {
+      alert('Pilih jenis laporan');
+      valid = false;
+    }
+
+    if (!valid) return;
+
+    var $btn = $(this).find('button[type="submit"]');
+    $btn.prop('disabled', true).text('Mendaftar...');
+
+    $.ajax({
+      url: 'php/register_mahasiswa.php',
+      type: 'POST',
+      data: { nama: nama, nim: nim, prodi: prodi, no_wa: wa, jenis_laporan: jenisLaporan },
+      dataType: 'json',
+      success: function (res) {
+        if (res.success) {
+          alert('✅ Pendaftaran berhasil!\n\nData Anda sedang menunggu validasi dari Fakultas dan Keuangan.\n\nGunakan fitur "Cek Status" dengan NIM Anda untuk melihat progress.');
+          $('#registrationForm')[0].reset();
+        } else {
+          alert('Gagal: ' + (res.error || 'Unknown error'));
+        }
+        $btn.prop('disabled', false).text('Daftar Sekarang');
+      },
+      error: function () {
+        alert('Error koneksi ke server');
+        $btn.prop('disabled', false).text('Daftar Sekarang');
       }
     });
   });
 
-  // Form submit
-  $('#registrationForm').submit(function(e) {
+  // ===============================
+  // ORDER FORM
+  // ===============================
+  $('#orderForm').submit(function (e) {
     e.preventDefault();
-    if (!validateForm()) return;
-    var nim = $('#nim').val();
-    $.get('php/get_validasi.php?search=' + nim, function(data) {
-      if (data.length > 0 && data[0].valid_fakultas && data[0].valid_keuangan && data[0].valid_yayasan) {
-        var formData = new FormData($('#registrationForm')[0]);
-        formData.append('mahasiswa_id', data[0].id); // Tambah ID mahasiswa
-        formData.append('nama', $('#nama').val()); // Tambah fields lain jika perlu (backend bisa ambil dari DB)
-        formData.append('nim', nim);
-        formData.append('prodi', $('#prodi').val());
-        formData.append('no_wa', $('#wa').val());
-        formData.append('nama_dokumen', $('#namaDokumen').val()); // Tambah untuk insert mahasiswa jika baru
-        formData.append('catatan', $('#catatan').val());
-        formData.append('file', $('#fileUpload')[0].files[0]);
-        $.ajax({
-          url: 'php/place_order.php',
-          type: 'POST',
-          data: formData,
-          processData: false,
-          contentType: false,
-          success: function(res) {
-            alert(res.success ? 'Order berhasil disimpan!' : res.error);
-            loadQueueStatus(); // Refresh queue
-          },
-          error: function() { alert('Error koneksi'); }
-        });
-      } else {
-        alert('Validasi belum lengkap. Ajukan dulu via search.');
+
+    var mahasiswaId = $('#mahasiswaId').val();
+    var namaDokumen = $('#namaDokumen').val().trim();
+    var file = $('#fileUpload')[0].files[0];
+
+    if (!mahasiswaId) {
+      alert('Error: Data tidak ditemukan. Cari ulang NIM Anda.');
+      return;
+    }
+    if (!namaDokumen) {
+      alert('Judul dokumen wajib diisi');
+      return;
+    }
+    if (!file) {
+      alert('Pilih file PDF');
+      return;
+    }
+    if (file.size > 10485760 || file.type !== 'application/pdf') {
+      alert('File harus PDF dan max 10MB');
+      return;
+    }
+
+    var formData = new FormData();
+    formData.append('mahasiswa_id', mahasiswaId);
+    formData.append('nama_dokumen', namaDokumen);
+    formData.append('catatan', $('#catatan').val().trim());
+    formData.append('file', file);
+
+    var $btn = $(this).find('button[type="submit"]');
+    $btn.prop('disabled', true).text('Mengirim...');
+
+    $.ajax({
+      url: 'php/place_order.php',
+      type: 'POST',
+      data: formData,
+      processData: false,
+      contentType: false,
+      success: function (res) {
+        if (res.success) {
+          var orderId = res.order_id || '';
+          alert('✅ Order berhasil!\n\nNomor Antrian Anda: #' + orderId + '\n\nSimpan nomor ini untuk cek status pesanan.');
+          $('#orderForm')[0].reset();
+          $('#fileName').text('Belum ada file dipilih');
+          $('#charCount').text('200');
+          $('#wordCount').text('0');
+          $('#orderSection').hide();
+          $('#searchResult').hide();
+          $('#searchInput').val('');
+          $('#pendaftaran').show();
+          loadQueueStatus();
+          scrollToSection('beranda');
+        } else {
+          alert('Gagal: ' + (res.error || 'Unknown error'));
+        }
+        $btn.prop('disabled', false).text('Submit Order');
+      },
+      error: function () {
+        alert('Error koneksi');
+        $btn.prop('disabled', false).text('Submit Order');
       }
     });
   });
+
 });

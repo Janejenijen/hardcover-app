@@ -1,44 +1,106 @@
 <?php
+/**
+ * PLACE ORDER - Submit pesanan hardcover
+ * Mahasiswa yang sudah divalidasi bisa submit order
+ */
 include 'config.php';
 
+header('Content-Type: application/json');
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die(json_encode(['error' => 'Invalid request']));
+  http_response_code(405);
+  echo json_encode(['error' => 'Invalid request']);
+  exit;
 }
 
 $mahasiswa_id = $_POST['mahasiswa_id'] ?? null;
+$catatan = trim($_POST['catatan'] ?? '');
+$nama_dokumen = trim($_POST['nama_dokumen'] ?? '');
 
-// Cek validasi
+if (!$mahasiswa_id) {
+  echo json_encode(['error' => 'Mahasiswa ID required']);
+  exit;
+}
+
+if (empty($nama_dokumen)) {
+  echo json_encode(['error' => 'Judul dokumen wajib diisi']);
+  exit;
+}
+
+// Cek validasi - hanya perlu fakultas dan keuangan
 $stmt = $pdo->prepare("
-  SELECT * FROM validasi 
-  WHERE mahasiswa_id = ? 
-  AND valid_fakultas = TRUE 
-  AND valid_keuangan = TRUE
+    SELECT * FROM validasi 
+    WHERE mahasiswa_id = ? 
+    AND valid_fakultas = TRUE 
+    AND valid_keuangan = TRUE
 ");
 $stmt->execute([$mahasiswa_id]);
 
 if (!$stmt->fetch()) {
-    die(json_encode(['error' => 'Belum tervalidasi']));
+  echo json_encode(['error' => 'Belum tervalidasi oleh Fakultas dan Keuangan']);
+  exit;
+}
+
+// Cek apakah sudah ada order yang belum selesai (mencegah duplicate)
+$checkOrder = $pdo->prepare("
+    SELECT id FROM orders 
+    WHERE mahasiswa_id = ? 
+    AND status NOT IN ('SELESAI', 'SUDAH_DIAMBIL')
+");
+$checkOrder->execute([$mahasiswa_id]);
+
+if ($checkOrder->fetch()) {
+  echo json_encode(['error' => 'Anda masih memiliki pesanan yang sedang diproses. Tunggu pesanan selesai sebelum membuat pesanan baru.']);
+  exit;
 }
 
 // Upload PDF
 if (
-    isset($_FILES['file']) &&
-    $_FILES['file']['error'] === 0 &&
-    $_FILES['file']['size'] <= 10485760 &&
-    mime_content_type($_FILES['file']['tmp_name']) === 'application/pdf'
+  isset($_FILES['file']) &&
+  $_FILES['file']['error'] === 0 &&
+  $_FILES['file']['size'] <= 10485760 &&
+  mime_content_type($_FILES['file']['tmp_name']) === 'application/pdf'
 ) {
-    $file_path = '../uploads/' . $mahasiswa_id . '_' . time() . '.pdf';
-    move_uploaded_file($_FILES['file']['tmp_name'], $file_path);
+  $file_name = $mahasiswa_id . '_' . time() . '.pdf';
+  $file_path = '../uploads/' . $file_name;
 
-    $pdo->prepare("
-      INSERT INTO orders (mahasiswa_id, file_pdf, status, created_at)
-      VALUES (?, ?, 'menunggu', NOW())
-    ")->execute([$mahasiswa_id, $file_path]);
-
-    echo json_encode(['success' => true]);
+  if (!move_uploaded_file($_FILES['file']['tmp_name'], $file_path)) {
+    echo json_encode(['error' => 'Gagal upload file']);
     exit;
+  }
+
+  try {
+    // Insert ke tabel orders dengan status MENUNGGU_PROSES
+    $orderStmt = $pdo->prepare("
+            INSERT INTO orders (mahasiswa_id, status, tanggal_order)
+            VALUES (?, 'MENUNGGU_PROSES', NOW())
+        ");
+    $orderStmt->execute([$mahasiswa_id]);
+
+    $order_id = $pdo->lastInsertId();
+
+    // Insert ke tabel dokumen dengan judul dan catatan terpisah
+    $docStmt = $pdo->prepare("
+            INSERT INTO dokumen (mahasiswa_id, file_path, judul, catatan, uploaded_at)
+            VALUES (?, ?, ?, ?, NOW())
+        ");
+    $docStmt->execute([$mahasiswa_id, $file_name, $nama_dokumen, $catatan]);
+
+    // Kirim notifikasi
+    $notifStmt = $pdo->prepare("
+            INSERT INTO notifikasi (mahasiswa_id, pesan)
+            VALUES (?, ?)
+        ");
+    $notifStmt->execute([$mahasiswa_id, "Pesanan #$order_id berhasil disubmit! Silakan tunggu proses fotokopi."]);
+
+    echo json_encode(['success' => true, 'order_id' => $order_id]);
+
+  } catch (Exception $e) {
+    echo json_encode(['error' => 'Database error: ' . $e->getMessage()]);
+  }
+  exit;
 }
 
-echo json_encode(['error' => 'File tidak valid']);
+echo json_encode(['error' => 'File tidak valid (harus PDF, max 10MB)']);
 exit;
 ?>

@@ -80,6 +80,77 @@ if ($_SESSION['role'] !== 'yayasan') {
             </table>
         </section>
 
+        <!-- DETAIL PESANAN -->
+        <section class="table-card" style="margin-top: 30px;">
+            <h3>Detail Pesanan</h3>
+            <div class="table-header">
+                <div class="search-filter">
+                    <input type="text" id="searchPesanan" placeholder="Cari NIM atau Nama...">
+                    <select id="filterFakultas">
+                        <option value="">Semua Fakultas</option>
+                        <option value="Fakultas Pertanian">Pertanian</option>
+                        <option value="Fakultas Ekonomi dan Bisnis">Ekonomi & Bisnis</option>
+                        <option value="Fakultas Keperawatan">Keperawatan</option>
+                        <option value="Fakultas Pariwisata">Pariwisata</option>
+                        <option value="Fakultas Hukum">Hukum</option>
+                        <option value="Fakultas Ilmu Pendidikan">Ilmu Pendidikan</option>
+                        <option value="Fakultas Teknik">Teknik</option>
+                    </select>
+                    <select id="filterProdi">
+                        <option value="">Semua Prodi</option>
+                        <option value="Agribisnis">Agribisnis</option>
+                        <option value="Akuntansi">Akuntansi</option>
+                        <option value="Manajemen">Manajemen</option>
+                        <option value="Fisioterapi">Fisioterapi</option>
+                        <option value="Ilmu Keperawatan">Ilmu Keperawatan</option>
+                        <option value="Profesi Ners">Profesi Ners</option>
+                        <option value="Hospitality dan Pariwisata">Hospitality dan Pariwisata</option>
+                        <option value="Ilmu Hukum">Ilmu Hukum</option>
+                        <option value="Pendidikan Guru Sekolah Dasar">PGSD</option>
+                        <option value="Teknik Elektro">Teknik Elektro</option>
+                        <option value="Teknik Informatika">Teknik Informatika</option>
+                        <option value="Teknik Industri">Teknik Industri</option>
+                        <option value="Teknik Sipil">Teknik Sipil</option>
+                    </select>
+                    <select id="filterStatus">
+                        <option value="">Semua Status</option>
+                        <option value="MENUNGGU_PROSES">Menunggu</option>
+                        <option value="DIPROSES_FOTOKOPI">Diproses</option>
+                        <option value="SELESAI">Selesai</option>
+                        <option value="SUDAH_DIAMBIL">Diambil</option>
+                    </select>
+                    <select id="filterSemester">
+                        <option value="">Semua Semester</option>
+                        <option value="Ganjil">Ganjil</option>
+                        <option value="Genap">Genap</option>
+                    </select>
+                    <select id="filterTahunAjaran">
+                        <option value="">Semua Tahun</option>
+                        <option value="2023/2024">2023/2024</option>
+                        <option value="2024/2025">2024/2025</option>
+                        <option value="2025/2026">2025/2026</option>
+                        <option value="2026/2027">2026/2027</option>
+                    </select>
+                    <button onclick="applyFilter()">Cari</button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>No Antrian</th>
+                        <th>NIM</th>
+                        <th>Nama</th>
+                        <th>Prodi</th>
+                        <th>Jenis</th>
+                        <th>Jumlah Hal.</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="detailPesanan"></tbody>
+            </table>
+        </section>
+
     </main>
 
     <footer class="footer">

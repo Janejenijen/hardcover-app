@@ -26,7 +26,6 @@ if ($_SESSION['role'] !== 'fotokopi') {
     <div class="top-menu">
       <a href="#beranda" onclick="scrollToSection('beranda')">Beranda</a>
       <a href="#pesanan" onclick="scrollToSection('pesanan')">Pesanan</a>
-      <a href="#statistik" onclick="scrollToSection('statistik')">Statistik</a>
       <a href="php/logout.php" onclick="return confirm('Yakin ingin logout?')">Logout</a>
     </div>
   </header>
@@ -81,7 +80,7 @@ if ($_SESSION['role'] !== 'fotokopi') {
       <table class="antrian-table">
         <thead>
           <tr>
-            <th>No</th>
+            <th>No Antrian</th>
             <th>Nama</th>
             <th>NIM</th>
             <th>Jenis</th>
@@ -113,7 +112,7 @@ if ($_SESSION['role'] !== 'fotokopi') {
       <table class="semua-table">
         <thead>
           <tr>
-            <th>No</th>
+            <th>No Antrian</th>
             <th>Nama</th>
             <th>NIM</th>
             <th>Jenis</th>
@@ -123,11 +122,6 @@ if ($_SESSION['role'] !== 'fotokopi') {
         </thead>
         <tbody></tbody>
       </table>
-    </section>
-
-    <section id="statistik" class="statistik">
-      <h3>Statistik</h3>
-      <p>Statistik diambil dari database secara realtime.</p>
     </section>
 
   </main>

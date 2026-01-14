@@ -10,7 +10,15 @@ $(document).ready(function () {
 
   function togglePassword() {
     var passwordField = document.getElementById('password');
-    passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
+    var toggleIcon = document.querySelector('.toggle-password');
+
+    if (passwordField.type === 'password') {
+      passwordField.type = 'text';
+      toggleIcon.classList.add('password-visible');
+    } else {
+      passwordField.type = 'password';
+      toggleIcon.classList.remove('password-visible');
+    }
   }
   window.togglePassword = togglePassword;
 

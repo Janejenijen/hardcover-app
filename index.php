@@ -36,9 +36,9 @@
     <!-- Search Section -->
     <section class="search-section">
       <h2>Cek Status</h2>
-      <p>Masukkan NIM (8 digit) atau nomor antrian untuk cek status</p>
+      <p>Masukkan NIM (8 digit) untuk cek status</p>
       <div class="search-box">
-        <input type="text" id="searchInput" placeholder="NIM atau No. Antrian" maxlength="20" />
+        <input type="text" id="searchInput" placeholder="Masukkan NIM" maxlength="8" />
         <button type="button" id="btnCari">Cari</button>
       </div>
       <div id="searchResult" class="search-result"></div>
@@ -55,7 +55,8 @@
           <!-- Nama Lengkap -->
           <div class="form-group">
             <label>Nama Lengkap <span class="required">*</span></label>
-            <input type="text" id="nama" placeholder="Contoh: Andi Putra Wijaya" required />
+            <input type="text" id="nama" placeholder="Contoh: Andi Putra Wijaya" required
+              style="text-transform: capitalize;" />
             <small class="error" id="error-nama"></small>
           </div>
 
@@ -140,7 +141,7 @@
           <div class="form-group full-width">
             <label>Judul Dokumen/Skripsi <span class="required">*</span></label>
             <input type="text" id="namaDokumen" maxlength="200" placeholder="Judul lengkap skripsi Anda" required
-              oninput="updateCharCount()" />
+              oninput="updateCharCount()" style="text-transform: capitalize;" />
             <small>Sisa karakter: <span id="charCount">200</span></small>
           </div>
 
@@ -153,6 +154,12 @@
             <small class="error" id="error-file"></small>
           </div>
 
+          <div class="form-group">
+            <label>Jumlah Halaman <span class="required">*</span></label>
+            <input type="number" id="jumlahHalaman" min="1" max="1000" placeholder="Contoh: 80" required />
+            <small class="error" id="error-halaman"></small>
+          </div>
+
           <div class="form-group full-width">
             <label>Catatan Tambahan (opsional)</label>
             <textarea id="catatan" maxlength="1200" placeholder="Contoh: Hardcover warna biru tua"
@@ -161,7 +168,7 @@
           </div>
         </div>
 
-        <button type="submit" class="btn-submit">Submit Order</button>
+        <button type="submit" class="btn-submit">Kirim Order</button>
       </form>
     </section>
 
@@ -205,7 +212,7 @@
       <div class="contact-info">
         <p><strong>Lokasi:</strong> Gedung xxx lantai 1, Kairagi I Kombos Manado - 95253</p>
         <p><strong>Jam Operasional:</strong> Senin–Jumat 08:00–16:00 WITA</p>
-        <p><strong>WhatsApp Admin:</strong> <a href="https://wa.me/62895803717360" target="_blank">0895-8037-17360</a>
+        <p><strong>WhatsApp:</strong> <a href="https://wa.me/62895803717360" target="_blank">0895-8037-17360</a>
         </p>
       </div>
     </section>

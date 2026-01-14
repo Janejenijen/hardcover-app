@@ -2,8 +2,11 @@
 // YAYASAN REPORT DASHBOARD
 // ===============================================
 
+let allOrders = [];
+
 $(document).ready(function () {
     loadSummary();
+    loadAllOrders();
 
     // Set default date range (last 30 days)
     const today = new Date();
@@ -34,6 +37,155 @@ function loadSummary() {
         $('#diproses').text(diproses);
         $('#menunggu').text(menunggu);
     });
+}
+
+// Load all orders for detail table
+function loadAllOrders() {
+    $.getJSON('php/get_orders.php', function (data) {
+        allOrders = data.map(o => ({
+            id: o.id,
+            nim: o.mahasiswa_info.nim,
+            nama: o.mahasiswa_info.nama,
+            prodi: o.mahasiswa_info.prodi,
+            jenisLaporan: o.mahasiswa_info.jenis_laporan,
+            jumlahHalaman: o.mahasiswa_info.jumlah_halaman,
+            wa: o.mahasiswa_info.no_wa,
+            catatan: o.mahasiswa_info.catatan,
+            status: o.status,
+            tanggal: o.created_at,
+            semester: o.semester,
+            tahunAjaran: o.tahun_ajaran
+        }));
+        applyFilter();
+    });
+}
+
+// Apply search and prodi filter
+function applyFilter() {
+    const searchTerm = $('#searchPesanan').val().toLowerCase();
+    const fakultasFilter = $('#filterFakultas').val();
+    const prodiFilter = $('#filterProdi').val();
+    const statusFilter = $('#filterStatus').val();
+    const semesterFilter = $('#filterSemester').val();
+    const tahunAjaranFilter = $('#filterTahunAjaran').val();
+
+    // Mapping prodi to fakultas
+    const prodiToFakultas = {
+        'Agribisnis': 'Fakultas Pertanian',
+        'Akuntansi': 'Fakultas Ekonomi dan Bisnis',
+        'Manajemen': 'Fakultas Ekonomi dan Bisnis',
+        'Fisioterapi': 'Fakultas Keperawatan',
+        'Ilmu Keperawatan': 'Fakultas Keperawatan',
+        'Profesi Ners': 'Fakultas Keperawatan',
+        'Hospitality dan Pariwisata': 'Fakultas Pariwisata',
+        'Ilmu Hukum': 'Fakultas Hukum',
+        'Pendidikan Guru Sekolah Dasar': 'Fakultas Ilmu Pendidikan',
+        'Teknik Elektro': 'Fakultas Teknik',
+        'Teknik Informatika': 'Fakultas Teknik',
+        'Teknik Industri': 'Fakultas Teknik',
+        'Teknik Sipil': 'Fakultas Teknik'
+    };
+
+    const filtered = allOrders.filter(o => {
+        const matchSearch = !searchTerm ||
+            o.nim.toLowerCase().includes(searchTerm) ||
+            o.nama.toLowerCase().includes(searchTerm);
+        const matchFakultas = !fakultasFilter || prodiToFakultas[o.prodi] === fakultasFilter;
+        const matchProdi = !prodiFilter || o.prodi === prodiFilter;
+        const matchStatus = !statusFilter || o.status === statusFilter;
+        const matchSemester = !semesterFilter || o.semester === semesterFilter;
+        const matchTahunAjaran = !tahunAjaranFilter || o.tahunAjaran === tahunAjaranFilter;
+        return matchSearch && matchFakultas && matchProdi && matchStatus && matchSemester && matchTahunAjaran;
+    });
+
+    renderDetailTable(filtered);
+}
+
+// Render detail table
+function renderDetailTable(data) {
+    const tbody = $('#detailPesanan');
+
+    if (data.length === 0) {
+        tbody.html('<tr><td colspan="8" style="text-align:center;padding:30px;color:#888">Tidak ada data</td></tr>');
+        return;
+    }
+
+    let rows = '';
+    data.forEach(o => {
+        const statusLabel = getStatusLabel(o.status);
+        const statusColor = getStatusColor(o.status);
+
+        rows += `
+            <tr>
+                <td>#${o.id}</td>
+                <td>${o.nim}</td>
+                <td>${o.nama}</td>
+                <td>${o.prodi}</td>
+                <td>${o.jenisLaporan || 'KP'}</td>
+                <td>${o.jumlahHalaman || '-'}</td>
+                <td><span class="status ${statusColor}">${statusLabel}</span></td>
+                <td><button class="btn-detail" onclick="showDetail(${o.id})">Detail</button></td>
+            </tr>
+        `;
+    });
+    tbody.html(rows);
+}
+
+// Get status label
+function getStatusLabel(status) {
+    const labels = {
+        'MENUNGGU_PROSES': 'Menunggu',
+        'MENUNGGU_VALIDASI': 'Menunggu',
+        'DIPROSES_FOTOKOPI': 'Diproses',
+        'SELESAI': 'Selesai',
+        'SUDAH_DIAMBIL': 'Diambil'
+    };
+    return labels[status] || status;
+}
+
+// Get status color
+function getStatusColor(status) {
+    const colors = {
+        'MENUNGGU_PROSES': 'yellow',
+        'MENUNGGU_VALIDASI': 'yellow',
+        'DIPROSES_FOTOKOPI': 'red',
+        'SELESAI': 'green',
+        'SUDAH_DIAMBIL': 'blue'
+    };
+    return colors[status] || 'gray';
+}
+
+// Show detail popup
+function showDetail(orderId) {
+    const order = allOrders.find(o => o.id === orderId);
+    if (!order) return;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'popup-overlay';
+    document.body.appendChild(overlay);
+    overlay.onclick = () => overlay.remove();
+
+    overlay.innerHTML = `
+        <div class="popup-box" onclick="event.stopPropagation()">
+            <div class="popup-header">
+                <h3>Detail Pesanan #${order.id}</h3>
+                <span class="popup-close" onclick="this.closest('.popup-overlay').remove()">×</span>
+            </div>
+            <div class="popup-content">
+                <div class="info">
+                    <p><b>NIM</b>: ${order.nim}</p>
+                    <p><b>Nama</b>: ${order.nama}</p>
+                    <p><b>Prodi</b>: ${order.prodi}</p>
+                    <p><b>Jenis Laporan</b>: ${order.jenisLaporan || 'KP'}</p>
+                    <p><b>Jumlah Halaman</b>: ${order.jumlahHalaman || '-'}</p>
+                    <p><b>WhatsApp</b>: ${order.wa || '-'}</p>
+                    <p><b>Catatan</b>: ${order.catatan || '-'}</p>
+                    <p><b>Status</b>: <span class="status ${getStatusColor(order.status)}">${getStatusLabel(order.status)}</span></p>
+                    <p><b>Tanggal Order</b>: ${order.tanggal}</p>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 function loadLaporan() {

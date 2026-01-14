@@ -1,21 +1,36 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login Panel - Hardcover UKDLSM</title>
   <link rel="stylesheet" href="css/login.css" />
-  <script src="js/jquery.min.js"></script> 
+  <script src="js/jquery.min.js"></script>
 </head>
+
 <body>
   <div class="login-box">
-    <img src="assets/logo.png" alt="Logo" class="logo"> 
+    <img src="assets/logo.png" alt="Logo" class="logo">
     <p>Hardcover Mahasiswa UKDLSM</p>
     <div class="form-group">
       <input type="text" id="username" placeholder="Username" autocomplete="off">
       <div class="password-wrapper">
         <input type="password" id="password" placeholder="Password">
-        <span class="toggle-password" onclick="togglePassword()"><img src="assets/Eye.png" alt="Toggle Password"></span> 
+        <span class="toggle-password" onclick="togglePassword()">
+          <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <g class="eye-open">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </g>
+            <g class="eye-closed">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+              <line x1="1" y1="1" x2="23" y2="23"></line>
+            </g>
+          </svg>
+        </span>
       </div>
     </div>
 
@@ -24,10 +39,11 @@
     <button id="loginBtn">Masuk</button>
 
     <div class="back">
-      <a href="index.php">← Kembali ke Beranda</a> 
+      <a href="index.php">← Kembali ke Beranda</a>
     </div>
   </div>
 
-  <script src="js/login.js"></script> 
+  <script src="js/login.js"></script>
 </body>
+
 </html>

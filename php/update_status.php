@@ -13,7 +13,7 @@ if ($_SESSION['role'] !== 'fotokopi') {
 $data = json_decode(file_get_contents('php://input'), true);
 
 $order_id = $data['order_id'] ?? null;
-$status   = $data['status'] ?? null;
+$status = $data['status'] ?? null;
 
 if (!$order_id || !$status) {
     http_response_code(400);
@@ -22,7 +22,12 @@ if (!$order_id || !$status) {
 }
 
 try {
-    $stmt = $pdo->prepare("UPDATE orders SET status = ? WHERE id = ?");
+    // Jika status berubah ke SELESAI, set tanggal_selesai
+    if ($status === 'SELESAI') {
+        $stmt = $pdo->prepare("UPDATE orders SET status = ?, tanggal_selesai = NOW() WHERE id = ?");
+    } else {
+        $stmt = $pdo->prepare("UPDATE orders SET status = ? WHERE id = ?");
+    }
     $stmt->execute([$status, $order_id]);
 
     echo json_encode(['success' => true]);

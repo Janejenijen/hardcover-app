@@ -26,7 +26,7 @@ try {
         FROM mahasiswa m
         LEFT JOIN validasi v ON v.mahasiswa_id = m.id
         WHERE m.nim = ? OR m.nama LIKE ?
-        ORDER BY m.nama ASC
+        ORDER BY m.id DESC
         LIMIT 10
     ");
 

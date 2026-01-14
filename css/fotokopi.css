@@ -131,6 +131,23 @@ header {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
 }
 
+/* WHATSAPP BUTTON */
+.btn-wa {
+  background: #25D366;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+
+.btn-wa:hover {
+  background: #128C7E;
+}
+
 .table-header {
   display: flex;
   justify-content: space-between;
@@ -202,6 +219,32 @@ th {
   font-weight: bold;
 }
 
+.status.yellow {
+  background: #ff9800;
+  color: white;
+}
+
+.status.red {
+  background: #f44336;
+  color: white;
+}
+
+.status.blue {
+  background: #2196F3;
+  color: white;
+}
+
+.status.green {
+  background: #4caf50;
+  color: white;
+}
+
+.status.gray {
+  background: #9e9e9e;
+  color: white;
+}
+
+/* Legacy support */
 .status.selesai {
   background: #4caf50;
   color: white;

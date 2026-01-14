@@ -21,9 +21,9 @@ const STATUS_LABEL = {
 const STATUS_COLOR = {
     'MENUNGGU_PROSES': 'yellow',
     'MENUNGGU_VALIDASI': 'yellow', // Old status, same display
-    'DIPROSES_FOTOKOPI': 'blue',
+    'DIPROSES_FOTOKOPI': 'red',
     'SELESAI': 'green',
-    'SUDAH_DIAMBIL': 'gray'
+    'SUDAH_DIAMBIL': 'blue'
 };
 
 // ===============================
@@ -45,11 +45,14 @@ async function loadOrders() {
             nama: o.mahasiswa_info.nama,
             nim: o.mahasiswa_info.nim,
             prodi: o.mahasiswa_info.prodi,
+            jenisLaporan: o.mahasiswa_info.jenis_laporan,
             wa: o.mahasiswa_info.no_wa,
             catatan: o.mahasiswa_info.catatan,
+            jumlahHalaman: o.mahasiswa_info.jumlah_halaman,
             fileUrl: o.file_pdf ? `uploads/${o.file_pdf}` : null,
             status: o.status,
-            tanggal: o.created_at
+            tanggal: o.created_at,
+            tanggalSelesai: o.finished_at
         }));
 
         renderAll();
@@ -150,10 +153,10 @@ function renderTable(tbody, data, isAntrian) {
 
         if (isAntrian) {
             tr.innerHTML = `
-                <td>${order.no}</td>
+                <td>#${order.id}</td>
                 <td>${order.nama}</td>
                 <td>${order.nim}</td>
-                <td>Hardcover</td>
+                <td>${order.jenisLaporan || 'KP'}</td>
                 <td>${order.catatan || '-'}</td>
                 <td>
                     <button class="btn-proses"
@@ -168,10 +171,10 @@ function renderTable(tbody, data, isAntrian) {
             `;
         } else {
             tr.innerHTML = `
-                <td>${order.no}</td>
+                <td>#${order.id}</td>
                 <td>${order.nama}</td>
                 <td>${order.nim}</td>
-                <td>Hardcover</td>
+                <td>${order.jenisLaporan || 'KP'}</td>
                 <td>
                     <span class="status ${STATUS_COLOR[order.status]}">
                         ${STATUS_LABEL[order.status]}
@@ -219,6 +222,10 @@ function bukaDetail(orderId) {
                     <p><b>Nama</b>: ${o.nama}</p>
                     <p><b>NIM</b>: ${o.nim}</p>
                     <p><b>Prodi</b>: ${o.prodi}</p>
+                    <p><b>Jenis Laporan</b>: ${o.jenisLaporan || 'KP'}</p>
+                    <p><b>Jumlah Halaman</b>: ${o.jumlahHalaman || '-'}</p>
+                    <p><b>Tanggal Masuk</b>: ${o.tanggal || '-'}</p>
+                    <p><b>Tanggal Selesai</b>: ${o.tanggalSelesai || '-'}</p>
                     <p><b>WhatsApp</b>: ${o.wa || '-'}</p>
                     <p><b>Catatan</b>: ${o.catatan || '-'}</p>
 
@@ -262,6 +269,7 @@ function updateSummary() {
     document.querySelectorAll('.summary-item strong')[3].textContent =
         allOrders.filter(o => o.tanggal && o.tanggal.startsWith(today)).length;
 }
+
 
 // ===============================
 // INIT

@@ -68,7 +68,7 @@ try {
         $params[] = $jenis;
     }
 
-    $sql .= " ORDER BY m.nama ASC";
+    $sql .= " ORDER BY m.id DESC";
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);

@@ -13,9 +13,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
   exit;
 }
 
+
 $mahasiswa_id = $_POST['mahasiswa_id'] ?? null;
 $catatan = trim($_POST['catatan'] ?? '');
 $nama_dokumen = trim($_POST['nama_dokumen'] ?? '');
+$jumlah_halaman = (int) ($_POST['jumlah_halaman'] ?? 0);
 
 if (!$mahasiswa_id) {
   echo json_encode(['error' => 'Mahasiswa ID required']);
@@ -24,6 +26,11 @@ if (!$mahasiswa_id) {
 
 if (empty($nama_dokumen)) {
   echo json_encode(['error' => 'Judul dokumen wajib diisi']);
+  exit;
+}
+
+if ($jumlah_halaman < 1) {
+  echo json_encode(['error' => 'Jumlah halaman minimal 1']);
   exit;
 }
 
@@ -70,21 +77,36 @@ if (
   }
 
   try {
-    // Insert ke tabel orders dengan status MENUNGGU_PROSES
-    $orderStmt = $pdo->prepare("
-            INSERT INTO orders (mahasiswa_id, status, tanggal_order)
-            VALUES (?, 'MENUNGGU_PROSES', NOW())
-        ");
-    $orderStmt->execute([$mahasiswa_id]);
+    // AUTO-DETECT Semester dan Tahun Ajaran
+    $currentMonth = (int) date('n'); // 1-12
+    $currentYear = (int) date('Y');
 
+    // Semester: Ganjil (Juli-Des), Genap (Jan-Jun)
+    $semester = ($currentMonth >= 7) ? 'Ganjil' : 'Genap';
+
+    // Tahun Ajaran: Juli tahun X - Juni tahun X+1
+    if ($currentMonth >= 7) {
+      // Juli - Desember: tahun ajaran X/X+1
+      $tahunAjaran = $currentYear . '/' . ($currentYear + 1);
+    } else {
+      // Januari - Juni: tahun ajaran (X-1)/X
+      $tahunAjaran = ($currentYear - 1) . '/' . $currentYear;
+    }
+
+    // INSERT ORDER
+    $orderStmt = $pdo->prepare("
+        INSERT INTO orders (mahasiswa_id, status, semester, tahun_ajaran, tanggal_order) 
+        VALUES (?, 'MENUNGGU_PROSES', ?, ?, NOW())
+    ");
+    $orderStmt->execute([$mahasiswa_id, $semester, $tahunAjaran]);
     $order_id = $pdo->lastInsertId();
 
     // Insert ke tabel dokumen dengan judul dan catatan terpisah
     $docStmt = $pdo->prepare("
-            INSERT INTO dokumen (mahasiswa_id, file_path, judul, catatan, uploaded_at)
-            VALUES (?, ?, ?, ?, NOW())
+            INSERT INTO dokumen (mahasiswa_id, file_path, judul, jumlah_halaman, catatan, uploaded_at)
+            VALUES (?, ?, ?, ?, ?, NOW())
         ");
-    $docStmt->execute([$mahasiswa_id, $file_name, $nama_dokumen, $catatan]);
+    $docStmt->execute([$mahasiswa_id, $file_name, $nama_dokumen, $jumlah_halaman, $catatan]);
 
     // Kirim notifikasi
     $notifStmt = $pdo->prepare("

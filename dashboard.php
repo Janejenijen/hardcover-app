@@ -62,7 +62,7 @@ if ($_SESSION['role'] !== 'fotokopi') {
 
     <!-- ANTRIAN -->
     <div class="table-card">
-      <h3>Daftar Antrian</h3>
+      <h3>Daftar Selesai</h3>
 
       <!-- Search & Filter -->
       <div class="filter-row">
@@ -122,6 +122,12 @@ if ($_SESSION['role'] !== 'fotokopi') {
         </thead>
         <tbody></tbody>
       </table>
+      <!-- Pagination -->
+      <div class="pagination-container" id="paginationSemua" style="display:none;">
+        <button class="pagination-btn" id="btnPrevSemua" onclick="goToPageSemua('prev')">‹ Prev</button>
+        <span id="pageInfoSemua">Page 1 of 1</span>
+        <button class="pagination-btn" id="btnNextSemua" onclick="goToPageSemua('next')">Next ›</button>
+      </div>
     </section>
 
   </main>

@@ -3,6 +3,9 @@
 // ===============================================
 
 let allOrders = [];
+let filteredOrders = [];
+let currentPage = 1;
+const itemsPerPage = 10;
 
 $(document).ready(function () {
     loadSummary();
@@ -13,7 +16,26 @@ $(document).ready(function () {
     const lastMonth = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
     $('#end').val(today.toISOString().split('T')[0]);
     $('#start').val(lastMonth.toISOString().split('T')[0]);
+
+    // AUTO-SELECT current academic year
+    const currentTahunAjaran = detectCurrentTahunAjaran();
+    $('#filterTahunAjaran').val(currentTahunAjaran);
 });
+
+// Detect current academic year
+function detectCurrentTahunAjaran() {
+    const now = new Date();
+    const month = now.getMonth() + 1; // 1-12
+    const year = now.getFullYear();
+
+    // Juli - Desember: tahun X/X+1
+    if (month >= 7) {
+        return year + '/' + (year + 1);
+    } else {
+        // Januari - Juni: tahun (X-1)/X
+        return (year - 1) + '/' + year;
+    }
+}
 
 // Smooth scroll
 function scrollToSection(id) {
@@ -86,7 +108,7 @@ function applyFilter() {
         'Teknik Sipil': 'Fakultas Teknik'
     };
 
-    const filtered = allOrders.filter(o => {
+    filteredOrders = allOrders.filter(o => {
         const matchSearch = !searchTerm ||
             o.nim.toLowerCase().includes(searchTerm) ||
             o.nama.toLowerCase().includes(searchTerm);
@@ -98,20 +120,42 @@ function applyFilter() {
         return matchSearch && matchFakultas && matchProdi && matchStatus && matchSemester && matchTahunAjaran;
     });
 
-    renderDetailTable(filtered);
+    currentPage = 1; // Reset to first page
+    renderDetailTable();
 }
 
-// Render detail table
-function renderDetailTable(data) {
+// Render detail table with pagination
+function renderDetailTable() {
     const tbody = $('#detailPesanan');
+    const totalData = filteredOrders.length;
 
-    if (data.length === 0) {
+    // Show/hide pagination
+    const paginationContainer = $('#paginationContainer');
+    if (totalData > itemsPerPage) {
+        paginationContainer.show();
+    } else {
+        paginationContainer.hide();
+    }
+
+    // Calculate pagination
+    const totalPages = Math.ceil(totalData / itemsPerPage);
+    const startIdx = (currentPage - 1) * itemsPerPage;
+    const endIdx = Math.min(startIdx + itemsPerPage, totalData);
+    const pageData = filteredOrders.slice(startIdx, endIdx);
+
+    // Update page info
+    $('#pageInfo').text(`Page ${currentPage} of ${totalPages || 1}`);
+    $('#btnPrevPage').prop('disabled', currentPage === 1);
+    $('#btnNextPage').prop('disabled', currentPage >= totalPages);
+
+    // Render table
+    if (pageData.length === 0) {
         tbody.html('<tr><td colspan="8" style="text-align:center;padding:30px;color:#888">Tidak ada data</td></tr>');
         return;
     }
 
     let rows = '';
-    data.forEach(o => {
+    pageData.forEach(o => {
         const statusLabel = getStatusLabel(o.status);
         const statusColor = getStatusColor(o.status);
 
@@ -222,4 +266,45 @@ function loadLaporan() {
     }).fail(function () {
         alert('Gagal memuat laporan');
     });
+}
+
+// ===============================================
+// PAGINATION
+// ===============================================
+function goToPage(direction) {
+    const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+
+    if (direction === 'prev' && currentPage > 1) {
+        currentPage--;
+    } else if (direction === 'next' && currentPage < totalPages) {
+        currentPage++;
+    }
+
+    renderDetailTable();
+
+    // Scroll to top of table
+    document.getElementById('detailPesanan').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ===============================================
+// EXPORT EXCEL
+// ===============================================
+function showExportModal() {
+    document.getElementById('exportModal').style.display = 'flex';
+}
+
+function closeExportModal() {
+    document.getElementById('exportModal').style.display = 'none';
+}
+
+function executeExport() {
+    const filterValue = document.querySelector('input[name="exportFilter"]:checked').value;
+
+    // Redirect to download endpoint
+    window.location.href = `php/export_excel.php?status=${filterValue}`;
+
+    // Close modal after short delay
+    setTimeout(() => {
+        closeExportModal();
+    }, 500);
 }

@@ -6,6 +6,8 @@ const API_GET_ORDERS = 'php/get_orders.php';
 const API_UPDATE_STATUS = 'php/update_status.php';
 
 let allOrders = [];
+let currentPageSemua = 1;
+const itemsPerPage = 10;
 
 // ===============================
 // STATUS MAP (includes old status for backward compatibility)
@@ -131,8 +133,9 @@ function renderAll() {
         semua = semua.filter(o => o.status === filterStatusPesanan);
     }
 
+    currentPageSemua = 1; // Reset to page 1 when filtering
     renderTable(tbodyAntrian, antrian, true);
-    renderTable(tbodySemua, semua, false);
+    renderTableSemua(tbodySemua, semua);
 }
 
 function renderTable(tbody, data, isAntrian) {
@@ -270,8 +273,95 @@ function updateSummary() {
         allOrders.filter(o => o.tanggal && o.tanggal.startsWith(today)).length;
 }
 
+// ===============================
+// RENDER TABLE SEMUA (WITH PAGINATION)
+// ===============================
+let filteredSemua = [];
+
+function renderTableSemua(tbody, data) {
+    filteredSemua = data;
+    const totalData = filteredSemua.length;
+
+    // Show/hide pagination
+    const paginationContainer = document.getElementById('paginationSemua');
+    if (totalData > itemsPerPage) {
+        paginationContainer.style.display = 'flex';
+    } else {
+        paginationContainer.style.display = 'none';
+    }
+
+    // Calculate pagination
+    const totalPages = Math.ceil(totalData / itemsPerPage);
+    const startIdx = (currentPageSemua - 1) * itemsPerPage;
+    const endIdx = Math.min(startIdx + itemsPerPage, totalData);
+    const pageData = filteredSemua.slice(startIdx, endIdx);
+
+    // Update page info
+    document.getElementById('pageInfoSemua').textContent = `Page ${currentPageSemua} of ${totalPages || 1}`;
+    document.getElementById('btnPrevSemua').disabled = currentPageSemua === 1;
+    document.getElementById('btnNextSemua').disabled = currentPageSemua >= totalPages;
+
+    // Render table
+    tbody.innerHTML = '';
+
+    if (pageData.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align:center;padding:30px;color:#888">
+                    Tidak ada data
+                </td>
+            </tr>`;
+        return;
+    }
+
+    pageData.forEach(order => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>#${order.id}</td>
+            <td>${order.nama}</td>
+            <td>${order.nim}</td>
+            <td>${order.jenisLaporan || 'KP'}</td>
+            <td>
+                <span class="status ${STATUS_COLOR[order.status]}">
+                    ${STATUS_LABEL[order.status]}
+                </span>
+            </td>
+            <td>
+                <select onchange="ubahStatus(${order.id}, this.value)">
+                    <option value="MENUNGGU_PROSES" ${order.status === 'MENUNGGU_PROSES' ? 'selected' : ''}>Menunggu</option>
+                    <option value="DIPROSES_FOTOKOPI" ${order.status === 'DIPROSES_FOTOKOPI' ? 'selected' : ''}>Diproses</option>
+                    <option value="SELESAI" ${order.status === 'SELESAI' ? 'selected' : ''}>Selesai</option>
+                    <option value="SUDAH_DIAMBIL" ${order.status === 'SUDAH_DIAMBIL' ? 'selected' : ''}>Diambil</option>
+                </select>
+                <button class="btn-detail"
+                    onclick="bukaDetail(${order.id})">
+                    Detail
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function goToPageSemua(direction) {
+    const totalPages = Math.ceil(filteredSemua.length / itemsPerPage);
+
+    if (direction === 'prev' && currentPageSemua > 1) {
+        currentPageSemua--;
+    } else if (direction === 'next' && currentPageSemua < totalPages) {
+        currentPageSemua++;
+    }
+
+    const tbody = document.querySelector('.semua-table tbody');
+    renderTableSemua(tbody, filteredSemua);
+
+    // Scroll to table
+    document.querySelector('#pesanan').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 
 // ===============================
 // INIT
 // ===============================
 document.addEventListener('DOMContentLoaded', loadOrders);
+

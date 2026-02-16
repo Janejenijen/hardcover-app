@@ -583,3 +583,98 @@ th {
   background: #f3e5f5;
   color: #7b1fa2;
 }
+
+/* ===============================================
+   EXPORT BUTTON (Top Menu)
+   =============================================== */
+.btn-export {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 0 10px;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.btn-export:hover {
+  background: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+/* ===============================================
+   PAGINATION
+   =============================================== */
+.pagination-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 15px;
+  gap: 15px;
+  padding: 10px 0;
+}
+
+.pagination-container.hidden {
+  display: none;
+}
+
+.pagination-btn {
+  background: #2F58CE;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #1e3a8a;
+  transform: translateY(-1px);
+}
+
+.pagination-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+#pageInfo {
+  font-weight: 600;
+  color: #1a1a1a;
+  min-width: 100px;
+  text-align: center;
+}
+
+/* ===============================================
+   MODAL IMPROVEMENTS
+   =============================================== */
+.popup-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-primary {
+  background: #2F58CE;
+  color: white;
+  border: none;
+  padding: 10px 30px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 15px;
+  transition: all 0.3s;
+  width: 100%;
+}
+
+.btn-primary:hover {
+  background: #1e3a8a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(47, 88, 206, 0.3);
+}

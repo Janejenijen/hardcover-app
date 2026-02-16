@@ -139,8 +139,8 @@
 
         <div class="form-grid">
           <div class="form-group full-width">
-            <label>Judul Dokumen/Skripsi <span class="required">*</span></label>
-            <input type="text" id="namaDokumen" maxlength="200" placeholder="Judul lengkap skripsi Anda" required
+            <label>Judul Dokumen KP/Skripsi <span class="required">*</span></label>
+            <input type="text" id="namaDokumen" maxlength="200" placeholder="Judul lengkap KP/skripsi Anda" required
               oninput="updateCharCount()" style="text-transform: capitalize;" />
             <small>Sisa karakter: <span id="charCount">200</span></small>
           </div>

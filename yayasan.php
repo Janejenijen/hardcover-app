@@ -82,7 +82,10 @@ if ($_SESSION['role'] !== 'yayasan') {
 
         <!-- DETAIL PESANAN -->
         <section class="table-card" style="margin-top: 30px;">
-            <h3>Detail Pesanan</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 style="margin:0;">Detail Pesanan</h3>
+                <button class="btn-export" onclick="showExportModal()">📊 Export Excel</button>
+            </div>
             <div class="table-header">
                 <div class="search-filter">
                     <input type="text" id="searchPesanan" placeholder="Cari NIM atau Nama...">
@@ -149,9 +152,35 @@ if ($_SESSION['role'] !== 'yayasan') {
                 </thead>
                 <tbody id="detailPesanan"></tbody>
             </table>
+            <!-- Pagination -->
+            <div class="pagination-container" id="paginationContainer" style="display:none;">
+                <button class="pagination-btn" id="btnPrevPage" onclick="goToPage('prev')">‹ Prev</button>
+                <span id="pageInfo">Page 1 of 1</span>
+                <button class="pagination-btn" id="btnNextPage" onclick="goToPage('next')">Next ›</button>
+            </div>
         </section>
 
     </main>
+
+    <!-- Export Modal -->
+    <div id="exportModal" class="popup-overlay" style="display:none;">
+        <div class="popup-box" onclick="event.stopPropagation()">
+            <div class="popup-header">
+                <h3>Export Data ke Excel</h3>
+                <span class="popup-close" onclick="closeExportModal()">×</span>
+            </div>
+            <div class="popup-content">
+                <p style="margin-bottom: 15px;">Pilih data yang akan diexport:</p>
+                <label style="display:block; margin-bottom:10px;">
+                    <input type="radio" name="exportFilter" value="all" checked> Semua Data
+                </label>
+                <label style="display:block; margin-bottom:20px;">
+                    <input type="radio" name="exportFilter" value="SELESAI"> Hanya Data Selesai
+                </label>
+                <button class="btn-primary" onclick="executeExport()">Download Excel</button>
+            </div>
+        </div>
+    </div>
 
     <footer class="footer">
         <p>© 2025 Business Center UKDLSM</p>

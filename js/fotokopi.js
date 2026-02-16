@@ -9,6 +9,24 @@ let allOrders = [];
 let currentPageSemua = 1;
 const itemsPerPage = 10;
 
+// Detect current semester
+function detectCurrentSemester() {
+    const month = new Date().getMonth() + 1;
+    return (month >= 7) ? 'Ganjil' : 'Genap';
+}
+
+// Detect current academic year
+function detectCurrentTahunAjaran() {
+    const now = new Date();
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear();
+    if (month >= 7) {
+        return year + '/' + (year + 1);
+    } else {
+        return (year - 1) + '/' + year;
+    }
+}
+
 // ===============================
 // STATUS MAP (includes old status for backward compatibility)
 // ===============================
@@ -54,7 +72,9 @@ async function loadOrders() {
             fileUrl: o.file_pdf ? `uploads/${o.file_pdf}` : null,
             status: o.status,
             tanggal: o.created_at,
-            tanggalSelesai: o.finished_at
+            tanggalSelesai: o.finished_at,
+            semester: o.semester || '',
+            tahunAjaran: o.tahun_ajaran || ''
         }));
 
         renderAll();
@@ -122,6 +142,9 @@ function renderAll() {
     }
 
     // Filter semua pesanan
+    const filterSemester = document.getElementById('filterSemester')?.value || '';
+    const filterTahunAjaran = document.getElementById('filterTahunAjaran')?.value || '';
+
     let semua = [...allOrders];
     if (searchPesanan) {
         semua = semua.filter(o =>
@@ -131,6 +154,12 @@ function renderAll() {
     }
     if (filterStatusPesanan) {
         semua = semua.filter(o => o.status === filterStatusPesanan);
+    }
+    if (filterSemester) {
+        semua = semua.filter(o => o.semester === filterSemester);
+    }
+    if (filterTahunAjaran) {
+        semua = semua.filter(o => o.tahunAjaran === filterTahunAjaran);
     }
 
     currentPageSemua = 1; // Reset to page 1 when filtering
@@ -363,5 +392,13 @@ function goToPageSemua(direction) {
 // ===============================
 // INIT
 // ===============================
-document.addEventListener('DOMContentLoaded', loadOrders);
+document.addEventListener('DOMContentLoaded', function () {
+    // Auto-select current semester & tahun ajaran
+    const semesterEl = document.getElementById('filterSemester');
+    const tahunEl = document.getElementById('filterTahunAjaran');
+    if (semesterEl) semesterEl.value = detectCurrentSemester();
+    if (tahunEl) tahunEl.value = detectCurrentTahunAjaran();
+
+    loadOrders();
+});
 

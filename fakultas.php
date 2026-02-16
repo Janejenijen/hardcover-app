@@ -62,6 +62,18 @@ if ($_SESSION['role'] !== 'fakultas') {
                     <option value="valid">Sudah Valid</option>
                     <option value="belum">Belum Valid</option>
                 </select>
+                <select id="filterSemester">
+                    <option value="">Semua Semester</option>
+                    <option value="Ganjil">Ganjil</option>
+                    <option value="Genap">Genap</option>
+                </select>
+                <select id="filterTahunAjaran">
+                    <option value="">Semua Tahun</option>
+                    <option value="2023/2024">2023/2024</option>
+                    <option value="2024/2025">2024/2025</option>
+                    <option value="2025/2026">2025/2026</option>
+                    <option value="2026/2027">2026/2027</option>
+                </select>
                 <button type="button" onclick="loadData()">Cari</button>
             </div>
 

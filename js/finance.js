@@ -2,7 +2,29 @@
 // KEUANGAN (FINANCE) VALIDATION DASHBOARD
 // ===============================================
 
+// Detect current semester
+function detectCurrentSemester() {
+    const month = new Date().getMonth() + 1;
+    return (month >= 7) ? 'Ganjil' : 'Genap';
+}
+
+// Detect current academic year
+function detectCurrentTahunAjaran() {
+    const now = new Date();
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear();
+    if (month >= 7) {
+        return year + '/' + (year + 1);
+    } else {
+        return (year - 1) + '/' + year;
+    }
+}
+
 $(document).ready(function () {
+    // Auto-select current semester & tahun ajaran
+    $('#filterSemester').val(detectCurrentSemester());
+    $('#filterTahunAjaran').val(detectCurrentTahunAjaran());
+
     loadData();
 
     // Enter key search
@@ -20,9 +42,13 @@ function loadData() {
     var search = $('#searchInput').val() || '';
     var filterStatus = $('#filterStatus').val() || '';
     var filterJenis = $('#filterJenis').val() || '';
+    var filterSemester = $('#filterSemester').val() || '';
+    var filterTahunAjaran = $('#filterTahunAjaran').val() || '';
 
     var url = 'php/get_validasi.php?search=' + encodeURIComponent(search);
     if (filterJenis) url += '&jenis=' + encodeURIComponent(filterJenis);
+    if (filterSemester) url += '&semester=' + encodeURIComponent(filterSemester);
+    if (filterTahunAjaran) url += '&tahun_ajaran=' + encodeURIComponent(filterTahunAjaran);
 
     $.getJSON(url, function (data) {
         let rows = '';

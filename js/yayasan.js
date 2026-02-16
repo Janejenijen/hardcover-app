@@ -17,9 +17,11 @@ $(document).ready(function () {
     $('#end').val(today.toISOString().split('T')[0]);
     $('#start').val(lastMonth.toISOString().split('T')[0]);
 
-    // AUTO-SELECT current academic year
+    // AUTO-SELECT current academic year and semester
     const currentTahunAjaran = detectCurrentTahunAjaran();
+    const currentSemester = detectCurrentSemester();
     $('#filterTahunAjaran').val(currentTahunAjaran);
+    $('#filterSemester').val(currentSemester);
 });
 
 // Detect current academic year
@@ -35,6 +37,16 @@ function detectCurrentTahunAjaran() {
         // Januari - Juni: tahun (X-1)/X
         return (year - 1) + '/' + year;
     }
+}
+
+// Detect current semester
+function detectCurrentSemester() {
+    const now = new Date();
+    const month = now.getMonth() + 1; // 1-12
+
+    // Juli - Desember: Ganjil
+    // Januari - Juni: Genap
+    return (month >= 7) ? 'Ganjil' : 'Genap';
 }
 
 // Smooth scroll

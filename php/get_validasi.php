@@ -68,6 +68,30 @@ try {
         $params[] = $jenis;
     }
 
+    // Filter by semester (Ganjil: Jul-Dec, Genap: Jan-Jun)
+    $semester = $_GET['semester'] ?? '';
+    if (!empty($semester)) {
+        if ($semester === 'Ganjil') {
+            $sql .= " AND MONTH(m.created_at) BETWEEN 7 AND 12";
+        } elseif ($semester === 'Genap') {
+            $sql .= " AND MONTH(m.created_at) BETWEEN 1 AND 6";
+        }
+    }
+
+    // Filter by tahun ajaran (e.g. "2025/2026")
+    $tahunAjaran = $_GET['tahun_ajaran'] ?? '';
+    if (!empty($tahunAjaran)) {
+        $parts = explode('/', $tahunAjaran);
+        if (count($parts) === 2) {
+            $yearStart = (int) $parts[0];
+            $yearEnd = (int) $parts[1];
+            // Tahun ajaran: Juli tahun awal - Juni tahun akhir
+            $sql .= " AND m.created_at >= ? AND m.created_at < ?";
+            $params[] = "$yearStart-07-01";
+            $params[] = "$yearEnd-07-01";
+        }
+    }
+
     $sql .= " ORDER BY m.id DESC";
 
     $stmt = $pdo->prepare($sql);
